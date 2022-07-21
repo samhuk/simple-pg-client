@@ -25,10 +25,10 @@
   "license": "MIT",
   "repository": "https://github.com/samhuk/simple-pg",
   "dependencies": {
-    "@types/pg": "^8.6.5",
     "pg": "^8.7.3"
   },
   "devDependencies": {
+    "@types/pg": "^8.6.5",
     "@types/jest": "^28.1.1",
     "@types/node": "^17.0.19",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
