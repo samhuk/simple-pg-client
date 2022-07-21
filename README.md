@@ -1,24 +1,27 @@
-# package-starter
+# simple-pg
 
-A starter for creating a generic component/package with Typescript, Jest, and ESLint.
-
-## Setup
-
-Throughout the starter, the component is called `MyComponent` as a placeholder. Execute `setup.sh` (e.g. `sh setup.sh`) to replace all occurences of `MyComponent` (and `my-component` in some places) with your desired component name.
+Wrapper around [pg](https://www.npmjs.com/package/pg) that provides connection retrying logic and a simpler cut-down query interface, with optional access to the underlying `pg` interface.
 
 ## Usage
 
+```typescript
+import { createSimplePg } from 'simple-pg'
+const simplePg = createSimplePg({
+  host: 'localhost',
+  port: '5432',
+  username: 'postgres',
+  password: 'postgres',
+  db: 'my-app-store-prod',
+})
+```
+
+## Development
+
 `npm i`
 
-To start hot reloading: `npm start`
+`npm start` - Start a hot-reloading tsc build.
 
-Edit a file within `src` to observe hot-reloading.
-
-## NPM Publishing
-
-1. Ensure that `package.json` has the correct details for the npm package (including a version bump)
-2. `npm run check`
-3. `npm publish`
+`npm check` - Run linting, unit tests, and a tsc build.
 
 ## Notable Technologies
 
