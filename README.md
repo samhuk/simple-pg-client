@@ -1,8 +1,10 @@
 # simple-pg
 
-Wrapper around [pg](https://www.npmjs.com/package/pg) that provides connection retrying logic and a simpler cut-down query interface, with optional access to the underlying `pg` interface.
+Wrapper around [pg](https://www.npmjs.com/package/pg) that provides connection retrying logic and a simpler cut-down query interface, with optional access to the underlying `pg` client.
 
 ## Usage
+
+`npm i --save simple-pg`
 
 ```typescript
 import { createSimplePg } from 'simple-pg'
