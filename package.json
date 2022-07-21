@@ -19,8 +19,12 @@
     "check": "npm rum lint-errors-only && npm run build-ts && npm run unit-tests",
     "start": "tsc --project ./src/tsconfig.json --watch"
   },
-  "author": "",
+  "author": "https://github.com/samhuk/simple-pg",
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
+  "repository": "",
   "dependencies": {
     "@types/pg": "^8.6.5",
     "pg": "^8.7.3"
