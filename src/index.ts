@@ -1,13 +1,13 @@
 import { Client } from 'pg'
 import { loop } from './common/function'
 import { createDbService } from './dbService'
-import { SimplePgOptions, SimplePg, ResolvedMaintenanceDbOptions } from './types'
+import { SimplePgClientOptions, SimplePgClient, ResolvedMaintenanceDbOptions } from './types'
 
 const createDbUrl = (
   host: string,
   port: number,
   user: string,
-) => `${host}:${port}@${user}`
+) => `${user}@${host}:${port}`
 
 const addExtensions = (client: Client, extensionNames: string[]) => (
   client.query(extensionNames.map(en => `create extension if not exists "${en}";`).join(';\n'))
@@ -24,7 +24,7 @@ const createDefaultCreateDatabaseSql = (dbName: string) => `CREATE DATABASE "${d
   TABLESPACE = pg_default
   CONNECTION LIMIT = -1;`
 
-const createCreateDatabaseSql = (options: SimplePgOptions): string => {
+const createCreateDatabaseSql = (options: SimplePgClientOptions): string => {
   if (options.createDbSqlTemplate == null)
     return createDefaultCreateDatabaseSql(options.db)
 
@@ -32,7 +32,7 @@ const createCreateDatabaseSql = (options: SimplePgOptions): string => {
 }
 
 const createDbIfNotExistsAttempt = async (
-  options: SimplePgOptions,
+  options: SimplePgClientOptions,
   maintenanceDbOptions: ResolvedMaintenanceDbOptions,
   dbUrl: string,
   retryIndex: number,
@@ -100,7 +100,7 @@ const createDbIfNotExistsAttempt = async (
 }
 
 const createDbIfNotExists = (
-  options: SimplePgOptions,
+  options: SimplePgClientOptions,
 ): Promise<void> => new Promise((resolve, reject) => {
   const maintenanceDbOptions: ResolvedMaintenanceDbOptions = {
     db: options.maintenanceDbOptions.db ?? 'postgres',
@@ -123,7 +123,7 @@ const createDbIfNotExists = (
 })
 
 const connectAttempt = async (
-  options: SimplePgOptions,
+  options: SimplePgClientOptions,
   dbUrl: string,
   retryIndex: number,
 ): Promise<{ success: boolean, delayS?: number, c?: Client }> => {
@@ -160,7 +160,7 @@ const connectAttempt = async (
   }
 }
 
-const connect = (options: SimplePgOptions): Promise<Client> => new Promise((resolve, reject) => {
+const connect = (options: SimplePgClientOptions): Promise<Client> => new Promise((resolve, reject) => {
   const dbUrl = createDbUrl(options.host, options.port, options.user)
   loop((next, i) => {
     connectAttempt(options, dbUrl, i).then(result => {
@@ -174,14 +174,14 @@ const connect = (options: SimplePgOptions): Promise<Client> => new Promise((reso
   })
 })
 
-export const createSimplePg = async (options: SimplePgOptions): Promise<SimplePg> => {
+export const createSimplePgClient = async (options: SimplePgClientOptions): Promise<SimplePgClient> => {
   // Optionally create db if it does not exist, via a defined maintenance db on the server
   if (options.createDbIfNotExists ?? true) {
     try {
       await createDbIfNotExists(options)
     }
     catch {
-      return null
+      throw new Error(`Failed to create DB '${options.db}'`)
     }
   }
 
@@ -191,7 +191,7 @@ export const createSimplePg = async (options: SimplePgOptions): Promise<SimplePg
     c = await connect(options)
   }
   catch {
-    return null
+    throw new Error(`Failed to connect to DB '${options.db}'`)
   }
 
   // Set schema if given

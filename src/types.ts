@@ -44,9 +44,9 @@ export type ResolvedMaintenanceDbOptions = OmitTyped<Required<MaintenanceDbOptio
 type VoidOrPromiseVoid = void | Promise<void>
 
 /**
- * Options for the creation of a SimplePg instance.
+ * Options for the creation of a SimplePgClient instance.
  */
-export type SimplePgOptions = {
+export type SimplePgClientOptions = {
   /**
    * Host name/ip of the database server.
    */
@@ -157,7 +157,7 @@ export type SimplePgOptions = {
   }
 }
 
-export type SimplePg = DbService & {
+export type SimplePgClient = DbService & {
   client: Client
 }
 

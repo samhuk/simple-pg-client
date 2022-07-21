@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import { createSimplePg } from '.'
-import { SimplePgOptions } from './types'
+import { createSimplePgClient } from '.'
+import { SimplePgClientOptions } from './types'
 
-const DEFAULT_OPTIONS: SimplePgOptions = {
+const DEFAULT_OPTIONS: SimplePgClientOptions = {
   host: 'localhost',
   port: 5432,
   user: 'postgres',
@@ -31,11 +31,11 @@ CONNECTION LIMIT = -1;`,
   },
 }
 
-describe('createSimplePg', () => {
-  const fn = createSimplePg
+describe('createSimplePgClient', () => {
+  const fn = createSimplePgClient
 
   test('basic test of initial values', async () => {
-    const options: SimplePgOptions = {
+    const options: SimplePgClientOptions = {
       ...DEFAULT_OPTIONS,
       events: {
         onTryMaintenanceDbConnect: (c, i, m) => console.log(m),
@@ -57,10 +57,10 @@ describe('createSimplePg', () => {
         onDbConnectNumRetryExceeded: (c, i, e, m) => console.log(m),
       },
     }
-    const simplePg = await fn(options)
+    const simplePgClient = await fn(options)
 
-    expect(simplePg).toBeDefined()
+    expect(simplePgClient).toBeDefined()
 
-    await simplePg.client.end()
+    await simplePgClient.client.end()
   })
 })
