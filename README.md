@@ -78,7 +78,7 @@ See the Typescript JSDocs for descriptions of the options.
 
 `npm start` - Start a hot-reloading tsc build.
 
-`npm check` - Run linting, unit tests, and a tsc build.
+`npm run check` - Run linting, unit tests, and a tsc build.
 
 ## Notable Technologies
 
