@@ -103,11 +103,11 @@ const createDbIfNotExists = (
   options: SimplePgClientOptions,
 ): Promise<void> => new Promise((resolve, reject) => {
   const maintenanceDbOptions: ResolvedMaintenanceDbOptions = {
-    db: options.maintenanceDbOptions.db ?? 'postgres',
-    user: options.maintenanceDbOptions.user ?? options.user,
-    password: options.maintenanceDbOptions.password ?? options.password,
-    maxNumRetry: options.maintenanceDbOptions.maxNumRetry ?? options.maxNumRetry,
-    additionalPgOptions: options.maintenanceDbOptions.additionalPgOptions,
+    db: options.maintenanceDbOptions?.db ?? 'postgres',
+    user: options.maintenanceDbOptions?.user ?? options.user,
+    password: options.maintenanceDbOptions?.password ?? options.password,
+    maxNumRetry: options.maintenanceDbOptions?.maxNumRetry ?? options.maxNumRetry,
+    additionalPgOptions: options.maintenanceDbOptions?.additionalPgOptions,
   }
   const dbUrl = createDbUrl(options.host, options.port, maintenanceDbOptions.user)
   loop((next, i) => {
