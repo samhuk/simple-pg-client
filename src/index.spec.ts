@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { createSimplePgClient } from '.'
+import { createConsoleLogEventHandlers, createSimplePgClient } from '.'
 import { SimplePgClientOptions } from './types'
 
 const DEFAULT_OPTIONS: SimplePgClientOptions = {
@@ -37,25 +37,7 @@ describe('createSimplePgClient', () => {
   test('basic test of initial values', async () => {
     const options: SimplePgClientOptions = {
       ...DEFAULT_OPTIONS,
-      events: {
-        onTryMaintenanceDbConnect: (c, i, m) => console.log(m),
-        onMaintenanceDbConnect: (c, i, m) => console.log(m),
-        onMaintenanceDbConnectFail: (c, i, e, m) => console.log(m),
-        onMaintenanceDbConnectNumRetryExceeded: (c, i, m) => console.log(m),
-
-        onDetermineIfDbExistsStart: (c, m) => console.log(m),
-        onDetermineDbExists: (c, m) => console.log(m),
-        onDetermineDbDoesNotExists: (c, m) => console.log(m),
-
-        onTryCreateDb: (c, m) => console.log(m),
-        onCreateDb: (c, m) => console.log(m),
-        onCreateDbFail: (c, e, m) => console.log(m),
-
-        onTryDbConnect: (c, m) => console.log(m),
-        onDbConnect: (c, m) => console.log(m),
-        onDbConnectFail: (c, i, e, m) => console.log(m),
-        onDbConnectNumRetryExceeded: (c, i, e, m) => console.log(m),
-      },
+      events: createConsoleLogEventHandlers(),
     }
     const simplePgClient = await fn(options)
 

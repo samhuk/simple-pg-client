@@ -1,7 +1,7 @@
 import { Client } from 'pg'
 import { loop } from './common/function'
 import { createDbService } from './dbService'
-import { SimplePgClientOptions, SimplePgClient, ResolvedMaintenanceDbOptions } from './types'
+import { SimplePgClientOptions, SimplePgClient, ResolvedMaintenanceDbOptions, SimplePgClientEventHandlers } from './types'
 
 const createDbUrl = (
   host: string,
@@ -174,14 +174,41 @@ const connect = (options: SimplePgClientOptions): Promise<Client> => new Promise
   })
 })
 
+/**
+ * Creates event handlers that handle all of the events of the connection process
+ * with a `console.log()` of the event message.
+ */
+export const createConsoleLogEventHandlers = (): SimplePgClientEventHandlers => ({
+  onTryMaintenanceDbConnect: (c, i, m) => console.log(m),
+  onMaintenanceDbConnect: (c, i, m) => console.log(m),
+  onMaintenanceDbConnectFail: (c, i, e, m) => console.log(m),
+  onMaintenanceDbConnectNumRetryExceeded: (c, i, m) => console.log(m),
+
+  onDetermineIfDbExistsStart: (c, m) => console.log(m),
+  onDetermineDbExists: (c, m) => console.log(m),
+  onDetermineDbDoesNotExists: (c, m) => console.log(m),
+
+  onTryCreateDb: (c, m) => console.log(m),
+  onCreateDb: (c, m) => console.log(m),
+  onCreateDbFail: (c, e, m) => console.log(m),
+
+  onTryDbConnect: (c, m) => console.log(m),
+  onDbConnect: (c, m) => console.log(m),
+  onDbConnectFail: (c, i, e, m) => console.log(m),
+  onDbConnectNumRetryExceeded: (c, i, e, m) => console.log(m),
+})
+
+/**
+ * Creates an instance of `SimplePgClient`, connecting to a PostgreSQL database.
+ */
 export const createSimplePgClient = async (options: SimplePgClientOptions): Promise<SimplePgClient> => {
   // Optionally create db if it does not exist, via a defined maintenance db on the server
   if (options.createDbIfNotExists ?? true) {
     try {
       await createDbIfNotExists(options)
     }
-    catch {
-      throw new Error(`Failed to create DB '${options.db}'`)
+    catch (e) {
+      throw new Error(`Failed to create DB '${options.db}'. Error: ${e}`)
     }
   }
 
@@ -190,8 +217,8 @@ export const createSimplePgClient = async (options: SimplePgClientOptions): Prom
   try {
     c = await connect(options)
   }
-  catch {
-    throw new Error(`Failed to connect to DB '${options.db}'`)
+  catch (e) {
+    throw new Error(`Failed to connect to DB '${options.db}'. Error: ${e}`)
   }
 
   // Set schema if given

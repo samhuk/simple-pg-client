@@ -43,6 +43,29 @@ export type ResolvedMaintenanceDbOptions = OmitTyped<Required<MaintenanceDbOptio
 
 type VoidOrPromiseVoid = void | Promise<void>
 
+export type SimplePgClientEventHandlers = {
+  onTryMaintenanceDbConnect?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
+  onMaintenanceDbConnect?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
+  onMaintenanceDbConnectFail?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
+  onMaintenanceDbConnectNumRetryExceeded?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
+
+  onDetermineIfDbExistsStart?: (c: Client, message: string) => VoidOrPromiseVoid
+  onDetermineDbExists?: (c: Client, message: string) => VoidOrPromiseVoid
+  onDetermineDbDoesNotExists?: (c: Client, message: string) => VoidOrPromiseVoid
+
+  onTryCreateDb?: (c: Client, message: string) => VoidOrPromiseVoid
+  onCreateDb?: (c: Client, message: string) => VoidOrPromiseVoid
+  onCreateDbFail?: (c: Client, e: any, message: string) => VoidOrPromiseVoid
+
+  onTryDbConnect?: (c: Client, message: string) => VoidOrPromiseVoid
+  onDbConnect?: (c: Client, message: string) => void | VoidOrPromiseVoid
+  onDbConnectFail?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
+  onDbConnectNumRetryExceeded?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
+
+  onQuery?: DbServiceOptions['events']['onQuery']
+  onQueryError?: DbServiceOptions['events']['onError']
+}
+
 /**
  * Options for the creation of a SimplePgClient instance.
  */
@@ -133,28 +156,11 @@ export type SimplePgClientOptions = {
    * Optional additional pg client config, e.g. `keepAlive`, `query_timeout`, `ssl`, and so on.
    */
   additionalPgOptions?: OmitTyped<ClientConfig, 'host' | 'port' | 'user' | 'password' | 'database'>
-  events?: {
-    onTryMaintenanceDbConnect?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
-    onMaintenanceDbConnect?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
-    onMaintenanceDbConnectFail?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
-    onMaintenanceDbConnectNumRetryExceeded?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
-
-    onDetermineIfDbExistsStart?: (c: Client, message: string) => VoidOrPromiseVoid
-    onDetermineDbExists?: (c: Client, message: string) => VoidOrPromiseVoid
-    onDetermineDbDoesNotExists?: (c: Client, message: string) => VoidOrPromiseVoid
-
-    onTryCreateDb?: (c: Client, message: string) => VoidOrPromiseVoid
-    onCreateDb?: (c: Client, message: string) => VoidOrPromiseVoid
-    onCreateDbFail?: (c: Client, e: any, message: string) => VoidOrPromiseVoid
-
-    onTryDbConnect?: (c: Client, message: string) => VoidOrPromiseVoid
-    onDbConnect?: (c: Client, message: string) => void | VoidOrPromiseVoid
-    onDbConnectFail?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
-    onDbConnectNumRetryExceeded?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
-
-    onQuery?: DbServiceOptions['events']['onQuery']
-    onQueryError?: DbServiceOptions['events']['onError']
-  }
+  /**
+   * Events of the connection process and client that can be handled. Each one can return a
+   * promise, pausing execution until it resolves.
+   */
+  events?: SimplePgClientEventHandlers
 }
 
 export type SimplePgClient = DbService & {
