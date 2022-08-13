@@ -43,6 +43,11 @@ export type ResolvedMaintenanceDbOptions = OmitTyped<Required<MaintenanceDbOptio
 
 type VoidOrPromiseVoid = void | Promise<void>
 
+export type SimplePgClientQueryEventHandlers = {
+  onQuery?: DbServiceOptions['events']['onQuery']
+  onQueryError?: DbServiceOptions['events']['onError']
+}
+
 export type SimplePgClientEventHandlers = {
   onTryMaintenanceDbConnect?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
   onMaintenanceDbConnect?: (c: Client, retryIndex: number, message: string) => VoidOrPromiseVoid
@@ -61,9 +66,26 @@ export type SimplePgClientEventHandlers = {
   onDbConnect?: (c: Client, message: string) => void | VoidOrPromiseVoid
   onDbConnectFail?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
   onDbConnectNumRetryExceeded?: (c: Client, retryIndex: number, e: any, message: string) => VoidOrPromiseVoid
+} & SimplePgClientQueryEventHandlers
 
-  onQuery?: DbServiceOptions['events']['onQuery']
-  onQueryError?: DbServiceOptions['events']['onError']
+export type SimplePgClientFromClientOptions = {
+  /**
+   * The `Client` (from `pg`) to use to create the `SimplePgClient` instance from.
+   */
+  client: Client
+  /**
+   * Maximum number of characters in the `sql` parameter of `events.onQuery` and `events.onQueryError`.
+   *
+   * Leave as `undefined` or `-1` to disable truncation.
+   *
+   * @default undefined
+   */
+  sqlLoggingTruncation?: number
+  /**
+   * Events of the client that can be handled. Each one can return a promise, pausing
+   * execution until it resolves.
+   */
+  events?: SimplePgClientQueryEventHandlers
 }
 
 /**

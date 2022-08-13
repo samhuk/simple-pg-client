@@ -1,7 +1,13 @@
 import { Client } from 'pg'
 import { loop } from './common/function'
 import { createDbService } from './dbService'
-import { SimplePgClientOptions, SimplePgClient, ResolvedMaintenanceDbOptions, SimplePgClientEventHandlers } from './types'
+import {
+  SimplePgClientOptions,
+  SimplePgClient,
+  ResolvedMaintenanceDbOptions,
+  SimplePgClientEventHandlers,
+  SimplePgClientFromClientOptions,
+} from './types'
 
 const createDbUrl = (
   host: string,
@@ -199,7 +205,7 @@ export const createConsoleLogEventHandlers = (): SimplePgClientEventHandlers => 
 })
 
 /**
- * Creates an instance of `SimplePgClient`, connecting to a PostgreSQL database.
+ * Creates an instance of `SimplePgClient`, connecting to a PostgreSQL server.
  */
 export const createSimplePgClient = async (options: SimplePgClientOptions): Promise<SimplePgClient> => {
   // Optionally create db if it does not exist, via a defined maintenance db on the server
@@ -241,6 +247,29 @@ export const createSimplePgClient = async (options: SimplePgClientOptions): Prom
 
   return {
     client: c,
+    query: dbService.query,
+    queryExists: dbService.queryExists,
+    queryGetFirstRow: dbService.queryGetFirstRow,
+    queryGetRows: dbService.queryGetRows,
+  }
+}
+
+/**
+ * Creates an instance of `SimplePgClient` from an already-connected `Client` instance (from `pg`).
+ */
+export const createSimplePgClientFromClient = (options: SimplePgClientFromClientOptions): SimplePgClient => {
+  // Create db service, providing query functions on pg client
+  const dbService = createDbService({
+    client: options.client,
+    sqlLoggingTruncation: options.sqlLoggingTruncation,
+    events: {
+      onError: options.events?.onQueryError,
+      onQuery: options.events?.onQuery,
+    },
+  })
+
+  return {
+    client: options.client,
     query: dbService.query,
     queryExists: dbService.queryExists,
     queryGetFirstRow: dbService.queryGetFirstRow,
