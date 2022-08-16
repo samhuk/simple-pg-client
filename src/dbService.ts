@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { QueryResult } from 'pg'
 import { truncate } from './common/string'
 import { DbService, DbServiceOptions } from './types'
 
@@ -10,44 +11,27 @@ const onError = (options: DbServiceOptions, queryId: string, error: any, sql: st
   options.events?.onError?.(queryId, `Executing SQL Failed (${queryId}): ${error.message}`, sql, parameters)
 }
 
+const queryBase = async <T = any>(
+  options: DbServiceOptions,
+  sql: string,
+  parameters: any,
+  resultCreator: (result: QueryResult) => T,
+) => {
+  const queryId = randomUUID()
+  onQuery(options, queryId, sql, parameters)
+  try {
+    const result = await options.client.query(sql, parameters)
+    return resultCreator(result)
+  }
+  catch (e) {
+    onError(options, queryId, e, sql, parameters)
+    throw e
+  }
+}
+
 export const createDbService = (options: DbServiceOptions): DbService => ({
-  query: (sql, parameters) => {
-    const queryId = randomUUID()
-    onQuery(options, queryId, sql, parameters)
-    return options.client.query(sql, parameters)
-      .catch(error => {
-        onError(options, queryId, error, sql, parameters)
-        return null
-      })
-  },
-  queryExists: (sql, parameters) => {
-    const queryId = randomUUID()
-    onQuery(options, queryId, sql, parameters)
-    return options.client.query(sql, parameters)
-      .then(result => result.rowCount > 0)
-      .catch(error => {
-        onError(options, queryId, error, sql, parameters)
-        return null
-      })
-  },
-  queryGetFirstRow: (sql, parameters) => {
-    const queryId = randomUUID()
-    onQuery(options, queryId, sql, parameters)
-    return options.client.query(sql, parameters)
-      .then(result => result.rows[0])
-      .catch(error => {
-        onError(options, queryId, error, sql, parameters)
-        return null
-      })
-  },
-  queryGetRows: (sql, parameters) => {
-    const queryId = randomUUID()
-    onQuery(options, queryId, sql, parameters)
-    return options.client.query(sql, parameters)
-      .then(result => result.rows)
-      .catch(error => {
-        onError(options, queryId, error, sql, parameters)
-        return null
-      })
-  },
+  query: async (sql, parameters) => queryBase(options, sql, parameters, r => r),
+  queryExists: async (sql, parameters) => queryBase(options, sql, parameters, r => r.rows.length > 0),
+  queryGetFirstRow: async (sql, parameters) => queryBase(options, sql, parameters, r => r.rows[0]),
+  queryGetRows: async (sql, parameters) => queryBase(options, sql, parameters, r => r.rows),
 })
