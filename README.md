@@ -1,5 +1,8 @@
 # simple-pg-client
 
+![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
+[![npm version](https://badge.fury.io/js/simple-pg-client.svg)](https://badge.fury.io/js/simple-pg-client)
+
 Wrapper around [pg](https://www.npmjs.com/package/pg) that provides connection retrying, automatic database creation, and a simpler cut-down query interface, with optional access to the underlying `pg` client.
 
 ## Usage
